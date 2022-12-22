@@ -1,0 +1,142 @@
+const { registerBlockType } = wp.blocks;
+const { PanelBody, IconButton, Button } = wp.components;
+const { RichText, InspectorControls, ColorPalette, MediaUpload } = wp.editor;
+ 
+registerBlockType("myguten-block/custom-cta", {
+ title: "Call to Action",
+ description: "Block to generate custom call",
+ icon: "format-image",
+ category: "layout",
+ 
+ attributes: {
+   title: {
+     type: "string",
+     source: "html",
+     selector: "h2",
+   },
+   titleColor: {
+     type: "string",
+     default: "black",
+   },
+   body: { type: "string", source: "html", selector: "p" },
+   bodyColor: {
+     type: "string",
+     default: "black",
+   },
+   backgroundImage: {
+     type: "string",
+     default: null,
+   },
+ },
+ 
+ edit: ({ attributes, setAttributes }) => {
+   const { title, titleColor, body, bodyColor, backgroundImage } = attributes;
+ 
+   const changeTitle = (newTitle) => {
+     setAttributes({ title: newTitle });
+   };
+ 
+   const changeBody = (newContent) => {
+     setAttributes({ body: newContent });
+   };
+ 
+   const changeTitleColor = (selectedColor) => {
+     setAttributes({ titleColor: selectedColor });
+   };
+ 
+   const changeBodyColor = (selectedBodyColor) => {
+     setAttributes({ bodyColor: selectedBodyColor });
+   };
+ 
+   const changeImage = (updatedImage) => {
+     setAttributes({ backgroundImage: updatedImage.sizes.full.url });
+   };
+ 
+   return [
+     <InspectorControls style={{ marginBottom: "40px" }}>
+       <PanelBody title={"Font Color Settings"}>
+         <p>
+           <strong>Select a Title Color</strong>
+         </p>
+         <ColorPalette value={titleColor} onChange={changeTitleColor} />
+       </PanelBody>
+ 
+       <PanelBody title={"Background Image"}>
+         <p>Select Background Image</p>
+ 
+         <MediaUpload
+           onSelect={changeImage}
+           value={backgroundImage}
+           type="image"
+           render={({ open }) => (
+             <IconButton
+               onClick={open}
+               icon="upload"
+               className="editor-media-placehoder__button is-button is-default"
+             >
+               Open Media Library
+             </IconButton>
+           )}
+         />
+       </PanelBody>
+     </InspectorControls>,
+     <div
+       className="cta-container"
+       style={{
+         backgroundImage: `url(${backgroundImage})`,
+         backgroundSize: "cover",
+         backgroundPosition: "center",
+       }}
+     >
+       <RichText
+         key="editable"
+         tagName="h2"
+         placeholder="your tile"
+         value={title}
+         onChange={changeTitle}
+         style={{ color: titleColor }}
+       />
+       <InspectorControls style={{ marginBottom: "40px" }}>
+         <PanelBody title={"Font Color Settings"}>
+           <p>
+             <strong>Select a Body Color</strong>
+           </p>
+           <ColorPalette value={bodyColor} onChange={changeBodyColor} />
+         </PanelBody>
+       </InspectorControls>
+       ,
+       <RichText
+         key="editable"
+         tagName="p"
+         placeholder="Enter content"
+         value={body}
+         style={{ color: bodyColor }}
+         onChange={changeBody}
+       />
+     </div>,
+   ];
+ },
+ save: ({ attributes }) => {
+   const { title, titleColor, body, bodyColor, backgroundImage } = attributes;
+   return (
+     <div
+       className="container"
+       style={{
+         backgroundImage: `url(${backgroundImage})`,
+         backgroundSize: "cover",
+         backgroundPosition: "center",
+       }}
+     >
+       <h2 style={{ color: titleColor }}>{title}</h2>
+       // for RichText thre can be multiple line content so we have to use
+       richtext element
+       <RichText.Content
+         tagName="p"
+         value={body}
+         style={{ color: bodyColor }}
+       />
+     </div>
+   );
+ },
+});
+ 
