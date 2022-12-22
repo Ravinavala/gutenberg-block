@@ -1,163 +1,62 @@
-Wordpress - Create custom gutenberg block:
-
-
-Wordpress - Create custom gutenberg block:
-
-We will use @wordpress/scripts npm package, which installs the required dependencies and handles default configuration for webpack and Babel.
-cd wordpress/wp-content/plugins
-mkdir myguten-block
-cd myguten-block
-npm init  (Will create package.json file )
-npm i --save-dev --save-exact @wordpress/scripts (It will create and required dependency like babel, webpack, webpackcli)
-
-By default it use index.js file inside source folder
-
-This will install all the required packages and dependencies inside a node_module directory. Please note that it uses src/index.js as its entry point and will output the bundled file called index.js inside build directory.
-We will write our block related code inside src/index.js which webpack will bundle into build/index.js , and we can then enqueue build/index.js using our plugin.
-
-
-Create a src folder and index.js file. Create build folder we don't’ need to create index.js for build webpack will create it
-
-
-
-You can register a block by registering a new block type definition using a function called registerBlockType It takes two arguments :
-
-
-1-A block name ( A unique string to identify the block in a format namespace/block-name )
-2-A block configuration object ( Contains a few properties that are required before the block can be registered. Object [ { key: value } ] )
-
-
-
-Add this in src/index.js
-
-
-
 const { registerBlockType } = wp.blocks;
-
-
-
-
-
-
-
-
-
-registerBlockType( 'myguten-block/test-block', {
-
-
-	title: 'Basic Example',
-
-
-	icon: 'smiley',
-
-
-	category: 'layout',
-
-
-	edit: ( { className } ) => <div className={ className }>Hello World!</div>,
-
-
-	save: () => <div>Hello World!</div>,
-
-
-} );
-
-
-
-Create CSS files 
-
-1 for editor and 1 for frontend:
-src/editor.css
-src/style.css
-
-
-
-
-
-
-
-
+const { SelectControl, TextControl } = wp.components;
+const { RichText } = wp.editor;
  
+registerBlockType("myguten-block/custom-cta", {
+ title: "Call to Action",
+ description: "Block to generate custom call",
+ icon: "format-image",
+ category: "layout",
  
-While the block’s editor behaviors are implemented in JavaScript, you’ll need to register your block server-side to ensure that the script is enqueued when the editor loads.
-So let's create a plugin file and enqueue the bundled file build/index.js, our stylesheets src/editor.css and src/style.css
-Step Create Plugin file and register script:
-1. Register build/index.js file:
-wp_register_script(‘unique_name_that will use in register block, source file url, dependency array, fieltime as version so it will refresh every time as time update, true if you want to enqueue file in footer, by default it’s in header )
-wp_register_script('my-custom-block',plugins_url('build/index.js', __FILE__), array('wp-blocks', 'wp-element', 'wp-editor'), filemtime(plugin_dir_path(__FILE__) . 'build/index.js'));
- 
-Same way register, editor css and front end css, once it done register block type 
- 
-Register_block_type is used on server side to register block
-Accepts:  2 arguments: 1 block name same as used in js file, 2 object with contain :   'editor_script' => 'my-custom-block',
-       'editor_style' => 'my-custom-block-editor-style',
-       'style' => 'my-custom-block-frontend-style',
-
-
-
-
-
-
-
-
-There is more script to check our configuration define that inside package.json script module
-
-And run it like: npm run lint:js
-
-
-   "check-engines": "wp-scripts check-engines",
-   "check-licenses": "wp-scripts check-licenses --prod --gpl2 --ignore=abab", 
-   "lint:js": "wp-scripts lint-js src/index.js",
-   "lint:js-fix": "wp-scripts lint-js src/index.js --fix",
-   "lint:style": "wp-scripts lint-style",
-   "lint:style-fix": "wp-scripts lint-style --fix",
-   "lint:css:src": "wp-scripts lint-style 'src/**/*.css'",
-   "lint:pkg-json": "wp-scripts lint-pkg-json"
-
-
-
-Bu default wordpress provide all pckages like react, reactDom, jquery, moment, lodash
-
-if you want to override webpacck config. create webpack.config.js file 
- and you must have to include default configuration file.
-
-
-
-Location for default webpack config: nodu_module/@wordpres/scripts/config
-
-
-Provide your own webpack config
-Should there be any situation where you want to provide your own webpack config, you can do so. The build and start commands will use your provided file when:
-
-the command receives a --config argument. Example: wp-scripts build --config my-own-webpack-config.js.
-there is a file called webpack.config.js or webpack.config.babel.js in the top-level directory of your project (at the same level as package.json).
-Extending the webpack config
-To extend the provided webpack config, or replace subsections within the provided webpack config, you can provide your own webpack.config.js file, require the provided webpack.config.js file, and use the spread operator to import all of or part of the provided configuration.
-
-In the example below, a webpack.config.js file is added to the root folder extending the provided webpack config to include custom logic to parse module's source and convert it to a JavaScript object using toml. It may be useful to import toml or other non-JSON files as JSON, without specific loaders:
-
-const defaultConfig = require("@wordpress/scripts/config/webpack.config");
-console.log("aa" + defaultConfig);
-module.exports = {
- ...defaultConfig,
- module: {
-   ...defaultConfig.module,
-   rules: [
-     ...defaultConfig.module.rules,
-     {
-       test: /\.svg$/,
-       use: ["@svgr/webpack", "url-loader"],
-     },
-   ],
+ attributes: {
+   title: {
+     type: "string",
+     source: "html",
+     selector: "h2",
+   },
+   body: { type: "string", source: "html", selector: "p" },
  },
-};
  
-
-If you follow this approach, please, be aware that future versions of this package may change what webpack and Babel plugins we bundle, default configs, etc. Should those changes be necessary, they will be registered in the package’s CHANGELOG, so make sure to read it before upgrading.
-
-
-
-
-
-
-
+ edit: ({ attributes, setAttributes }) => {
+   const { title, body } = attributes;
+ 
+   const changeTitle = (newTitle) => {
+     setAttributes({ title: newTitle });
+   };
+ 
+   const changeBody = (newContent) => {
+     setAttributes({ body: newContent });
+   };
+ 
+   return (
+     <div className="">
+       <RichText
+         key="editable"
+         tagName="h2"
+         placeholder="your tile"
+         value={title}
+         onChange={changeTitle}
+       />
+       <RichText
+         key="editable"
+         tagName="p"
+         placeholder="Enter content"
+         value={body}
+         onChange={changeBody}
+       />
+     </div>
+   );
+ },
+ save: ({ attributes }) => {
+   const { title, body } = attributes;
+   return (
+     <div className="container">
+       <h2>{title}</h2>
+       // for RichText thre can be multiple line content so we have to use
+       richtext element
+       <RichText.Content tagName="p" value={body} />
+     </div>
+   );
+ },
+});
+ 
