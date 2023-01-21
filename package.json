@@ -1,0 +1,15 @@
+{
+  "name": "custom-gutenberg-block",
+  "version": "1.0.0",
+  "description": "Gutenberg custom block plugin",
+  "main": "index.js",
+  "scripts": {
+  "start": "wp-scripts start",
+  "build": "wp-scripts build"
+},
+  "author": "Ravina Vala",
+  "license": "ISC",
+  "devDependencies": {
+    "@wordpress/scripts": "25.1.0"
+  }
+}
