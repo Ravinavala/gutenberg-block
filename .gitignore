@@ -1,1 +1,10 @@
-/nbproject/private/
+nbproject/private/
+debug.log
+wp-content/uploads
+wp-content/cache
+wp-content/w3tc-config
+wp-config.php
+wp-content/advanced-cache.php
+.htaccess
+.DS_Store
+.vscode
