@@ -1,0 +1,32 @@
+.team-custom-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start; 
+}
+.team-custom-block .team_image {
+    width: 100%;
+    max-width: 50%;
+    margin-right: 1rem;
+    padding: 110px 20px;
+}
+.team_image, .team_content {
+  flex: 1;
+}
+.team-custom-block .team_content {
+    width: 100%;
+    max-width: 50%;
+}
+.team_content span {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+}
+@media (max-width: 768px) {
+    .team-custom-block{
+        flex-direction: column;
+    }
+.team-custom-block .team_content  {
+        width: 100%; 
+	max-width: 100%;
+    }
+}
